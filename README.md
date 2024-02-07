@@ -46,6 +46,7 @@ Vous devez rentrer l'uid ainsi que la clé secrète liés à l'api 42. L'applica
 
 - Protection contre les injections SQL (l'utilisation de typeORM aidant grandement)
 - Désinfection des entrées utilisateurs, gestions de types attendus etc.
+- Authentification / Autorisation
 
 ## Photos
 
