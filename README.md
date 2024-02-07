@@ -11,6 +11,7 @@ Nestjs pour le back, et sveltejs pour le front (donc essentiellement du typescri
 ## Usage
 
 `make up` . Cela va générer un environnement automatiquement.
+`make destroy` pour détruire les conteneurs.
 
 Vous devez rentrer le l'uid ainsi que la clé secrète liés à l'api 42. L'application n'est déployable que par les étudiant.e.s de 42. Si pour une raison ou une autre vous souhaitez voir le projet (vous êtes tombé sur ce projet via mon cv), veuillez me contacter.
 
