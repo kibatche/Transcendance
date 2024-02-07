@@ -1,0 +1,12 @@
+# Ignore everything
+*
+
+# Allow files and folders with a pattern starting with !
+
+!api_back/*.js
+!api_back/*.ts
+!api_back/*.json
+!api_back/*.html
+!api_back/*.lock
+!api_back/.env
+!api_back/src/uploads/avatars/default.png

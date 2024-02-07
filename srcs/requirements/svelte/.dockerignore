@@ -1,0 +1,11 @@
+# Ignore everything
+*
+
+# Allow files and folders with a pattern starting with !
+
+!api_front/*.js
+!api_front/*.ts
+!api_front/*.json
+!api_front/*.html
+!api_front/*.lock
+!api_front/.env

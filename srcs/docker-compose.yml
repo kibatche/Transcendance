@@ -1,0 +1,112 @@
+services:
+  backend_dev:
+    container_name: nestjs
+    build:
+      context: ./requirements/nestjs
+      target: development
+      dockerfile: Dockerfile
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_DB: "${POSTGRES_DB}"
+      POSTGRES_HOST: "${POSTGRES_HOST}"
+      POSTGRES_PORT: "${POSTGRES_PORT}"
+      NODE_ENV: "${NODE_ENV}"
+      WEBSITE_HOST: "${WEBSITE_HOST}"
+      WEBSITE_PORT: "${WEBSITE_PORT}"
+      REDIS_HOST: "${REDIS_HOST}"
+      REDIS_PORT: "${REDIS_PORT}"
+      FORTYTWO_CLIENT_ID: "${FORTYTWO_CLIENT_ID}"
+      FORTYTWO_CLIENT_SECRET : "${FORTYTWO_CLIENT_SECRET}"
+      FORTYTWO_CALLBACK_URL: "${FORTYTWO_CALLBACK_URL}"
+      COOKIE_SECRET: "${COOKIE_SECRET}"
+      TWO_FACTOR_AUTHENTICATION_APP_NAME : "${TWO_FACTOR_AUTHENTICATION_APP_NAME}"
+      TICKET_FOR_PLAYING_GAME_SECRET : "${TICKET_FOR_PLAYING_GAME_SECRET}"
+      PORT: "${PORT}"
+    volumes:
+      - ./requirements/nestjs/api_back/src:/usr/app/src
+      - ./requirements/nestjs/api_back/test:/usr/app/test/
+      - nestjs_photos_volume:/usr/app/uploads/avatars
+    restart: unless-stopped
+    depends_on:
+      - postgresql
+      - redis
+
+  game_server:
+    container_name: game_server
+    build:
+      context: ./requirements/game_server
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: "${NODE_ENV}"
+      WEBSITE_HOST: "${WEBSITE_HOST}"
+      WEBSITE_PORT: "${WEBSITE_PORT}"
+    restart: unless-stopped
+    ports:
+      - "8042:8042"
+    depends_on:
+      - backend_dev
+
+  frontend_dev:
+    container_name: svelte
+    build:
+      context: ./requirements/svelte
+      target: development
+      dockerfile: Dockerfile
+    volumes:
+      - ./requirements/svelte/api_front/src:/usr/app/src/
+      - ./requirements/svelte/api_front/public:/usr/app/public/
+    ports:
+      - "35729:35729"
+    environment:
+      WEBSITE_HOST: "${WEBSITE_HOST}"
+      WEBSITE_PORT: "${WEBSITE_PORT}"
+      NODE_ENV: "${NODE_ENV}"
+    restart: unless-stopped
+    depends_on:
+      - postgresql
+      - redis
+      - backend_dev
+
+  # t'embete pas a gerer ton propre container nginx
+  nginx:
+    container_name: nginx
+    image: nginx:alpine
+    restart: unless-stopped
+    volumes:
+      - ./requirements/nginx/conf/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./requirements/nginx/conf/nginx.conf:/etc/nginx/nginx.conf:ro
+    command: [nginx-debug, "-g", "daemon off;"]
+    ports:
+      - "8080:8080"
+    depends_on:
+      - backend_dev
+      - frontend_dev
+      - postgresql
+      - redis
+
+  postgresql:
+    container_name: postgresql
+    image: postgres
+    volumes:
+      - data_nest_postgresql:/var/lib/postgresql/data
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_DB: "${POSTGRES_DB}"
+      POSTGRES_HOST: "${POSTGRES_HOST}"
+      POSTGRES_PORT: "${POSTGRES_PORT}"
+
+  # Je connais pas redis, mais si t'en a besoin que a l'interieur de tes containers, je pense pas que t'as besoin d'un expose.
+  redis:
+    container_name: redis
+    image: redis:alpine
+    restart: unless-stopped
+    environment:
+      REDIS_HOST: "${REDIS_HOST}"
+      REDIS_PORT: "${REDIS_PORT}"
+
+volumes:
+  data_nest_postgresql:
+  nestjs_photos_volume:
